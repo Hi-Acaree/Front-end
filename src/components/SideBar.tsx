@@ -63,6 +63,8 @@ const SideBarFooter = styled.div`
     padding: 20px;
 `;
 
+//=== Component ===//
+
 
 
 const SideBar: React.FC = () => {

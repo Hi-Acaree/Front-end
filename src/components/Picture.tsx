@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
+//=== Styling ===//
+
 const PictureContainer = styled.div`
     /* Picture div styles */
     display: flex;
@@ -9,11 +11,15 @@ const PictureContainer = styled.div`
     /* Add your styles for the picture here */
 `;
 
+//=== Component Props ===//
+
 
 interface PictureProps {
     imageUrl: string;
     altText: string;
 }
+
+//=== Component ===//
 
 const Picture: React.FC<PictureProps> = ({ imageUrl, altText }) => {
 	return (

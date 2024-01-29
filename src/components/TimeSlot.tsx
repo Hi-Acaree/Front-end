@@ -1,7 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Doctor } from "../types/type";
+import { Doctor, MockDoctor } from "../types/type";
 // import { format } from "date-fns";
 import styled from "styled-components";
+
+//=== Styling ===//
 
 const TimeSlotContainer = styled.div`
 	/* TimeSlot div styles */
@@ -37,14 +39,27 @@ const TimeSlotFooter = styled.div`
 `;
 
 
+const mockTimeSlots = [
+	"9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
+	"11:00 AM", "11:30 AM", "12:00 PM", "12:30 PM",
+	"1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
+	"3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM"
+];
+
+
+//=== Component Props ===//
+
 
 interface TimeSlotProps {
     selectedDate: Date;
-    selectedDoctor: Doctor;
+    selectedDoctor: MockDoctor;
     setSelectedTimeSlot: (timeSlot: string) => void;
+	isDateSelected?: boolean;
 }
 
-const TimeSlot: React.FC<TimeSlotProps> = ({ selectedDate, selectedDoctor, setSelectedTimeSlot }) => {
+//=== Component ===//
+
+const TimeSlot: React.FC<TimeSlotProps> = ({ selectedDate, selectedDoctor, setSelectedTimeSlot, isDateSelected }) => {
 	const [timeSlots, setTimeSlots] = useState<string[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -77,14 +92,19 @@ const TimeSlot: React.FC<TimeSlotProps> = ({ selectedDate, selectedDoctor, setSe
 	}, [selectedDate, selectedDoctor]);
 
 
-
+	//== use memo to memoize or cache the time slot elements ==//
 	const timeSlotElements = useMemo(() => {
 		return timeSlots.map((timeSlot) => (
-			<button key={timeSlot} onClick={() => setSelectedTimeSlot(timeSlot)} className="time-slot-button">
+			<button
+				key={timeSlot}
+				onClick={() => setSelectedTimeSlot(timeSlot)}
+				className="time-slot-button"
+				disabled={!isDateSelected} // Disable the button if no date is selected
+			>
 				{timeSlot}
 			</button>
 		));
-	}, [timeSlots, setSelectedTimeSlot]);
+	}, [timeSlots, setSelectedTimeSlot, isDateSelected]); // Add isDateSelected to dependencies
 
 	return (
 		<TimeSlotContainer>

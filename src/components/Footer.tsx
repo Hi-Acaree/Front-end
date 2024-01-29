@@ -1,6 +1,8 @@
 import React from "react";
 import styled from "styled-components";
 
+//=== Styling ===//
+
 const FooterContainer = styled.div`
     /* Footer div styles */
     display: flex;
@@ -9,6 +11,7 @@ const FooterContainer = styled.div`
     /* Add your styles for the footer here */
 `;
 
+//=== Component ===//
 
 
 const Footer: React.FC = () => {

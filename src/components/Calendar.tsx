@@ -1,9 +1,13 @@
 import React from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
+import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { Button,  } from "react-bootstrap";
 import styled from "styled-components";
+import { useEffect, useRef } from "react";
+import "./calendar.css";
+
+//=== Styling ===//
 
 const CalendarContainer = styled.div`
     display: flex;
@@ -58,25 +62,30 @@ const CalendarFooter = styled.div`
     }
 `;
 
-
-
-
-
-
+//=== Component Props ===//
 interface CalendarProps {
     selectedDate: Date,
     setSelectedDate: (selectedDate: Date) => void,
 }
 
 const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) => {
+	const calendarRef = useRef<FullCalendar>(null); // Declare the ref; type is FullCalendar
+
+
+	useEffect(() => {
+		if (calendarRef.current) {
+			const calendarApi = calendarRef.current.getApi(); // Access the getApi method
+			calendarApi.gotoDate(selectedDate); // Navigates calendar to the specified date
+			console.log(selectedDate);
+		}
+	}, [selectedDate]);
+
 	return (
 		<CalendarContainer>
 			<CalendarHeader>
-				{/* Calendar header */}
 				<h2>Calendar</h2>
 			</CalendarHeader>
 			<CalendarBody>
-				{/* Calendar body */}
 				<FullCalendar
 					plugins={[dayGridPlugin, interactionPlugin]}
 					initialView="dayGridMonth"
@@ -85,10 +94,10 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) =>
 						{ title: "event 1", date: "2021-08-01" },
 						{ title: "event 2", date: "2021-08-02" },
 					]}
+					ref={calendarRef} // Pass the ref to the FullCalendar component
 				/>
 			</CalendarBody>
 			<CalendarFooter>
-				{/* Calendar footer */}
 				<Button variant="primary">Primary</Button>
 			</CalendarFooter>
 		</CalendarContainer>

@@ -2,6 +2,21 @@ import React from "react";
 import styled from "styled-components";
 import Picture from "./Picture.tsx";
 
+/**
+ * DoctorDetails component
+ * @param {number} id - Doctor ID
+ * @param {string} name - Doctor name
+ * @param {string} specialization - Doctor specialization
+ * @param {string} departmentName - Doctor department name
+ * @param {string} imgUrl - Doctor image URL
+ * @param {string} altText - Doctor image alt text
+ * @param {() => void} onSelectDoctor - Callback function when the user clicks on the Book button
+ * @returns {React.FC} - React component
+ * @see DoctorList
+ */
+
+//== Component Props ==//
+
 interface DoctorDetailsProps {
 	id: number;
     name: string;
@@ -13,6 +28,8 @@ interface DoctorDetailsProps {
 	onSelectMockDoctor: () => void;
 }
 
+//== Styled Components ==//
+
 const DoctorCard = styled.div`
     background-color: #fff;
     border-radius: 10px;
@@ -20,6 +37,7 @@ const DoctorCard = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     // padding: 20px;
     // margin: 10px;
 `;
@@ -71,7 +89,7 @@ const BookButton = styled.button`
 
 
 
-// Usage of the styled components within the DoctorDetails component
+// == Component == //
 const DoctorDetails: React.FC<DoctorDetailsProps> = ({ 
 	name, specialization, departmentName,
 	imgUrl, altText, onSelectMockDoctor }) => {
