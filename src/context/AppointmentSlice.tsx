@@ -6,10 +6,11 @@ import { MockDoctor, AppointmentState } from "../types/type";
 const initialState: AppointmentState = {
 	selectedDoctor: null,
 	appointmentType: "",
-	selectedDate: new Date(),
+	selectedDate: null,
 	selectedTimeSlot: "",
 	appointmentMsg: "",
 	bookingStep: "doctorList",
+	loading: false,
 };
 
 // Create the slice
@@ -34,6 +35,9 @@ const appointmentSlice = createSlice({
 		},
 		setBookingStep(state, action: PayloadAction<string>) {
 			state.bookingStep = action.payload;
+		},
+		setLoading(state, action: PayloadAction<boolean>) {
+			state.loading = action.payload;
 		},
 	},
 });

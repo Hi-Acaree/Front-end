@@ -1,107 +1,153 @@
-import React from "react";
+import React, { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
-import { Button,  } from "react-bootstrap";
-import styled from "styled-components";
+import interactionPlugin from "@fullcalendar/interaction";
+import { useDispatch } from "react-redux";
 import { useEffect, useRef } from "react";
 import "./calendar.css";
+import { appointmentActions } from "../context/AppointmentSlice.tsx";
+import { Card, Button } from "react-bootstrap";
 
-//=== Styling ===//
-
-const CalendarContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 800px; // Adjust as needed
-    margin: auto;
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-`;
-
-const CalendarHeader = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 10px;
-    background-color: #4caf50;
-    color: white;
-    font-size: 1.5rem;
-`;
-
-const CalendarBody = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    width: 100%;
-    .fc {
-        width: 100%; // FullCalendar class
-        max-width: 100%; // Ensure it doesn't exceed the container
-    }
-`;
-
-const CalendarFooter = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 10px;
-    button {
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 8px 12px;
-        &:hover {
-            background-color: #388e3c;
-        }
-    }
-`;
+/**
+ * Calendar component
+ * @param {Date} selectedDate - The selected date
+ * @param {function} setSelectedDate - Callback function to set the selected date
+ * @returns {JSX.Element} - Calendar component
+ */
 
 //=== Component Props ===//
 interface CalendarProps {
-    selectedDate: Date,
+    selectedDate: Date | null,
     setSelectedDate: (selectedDate: Date) => void,
 }
 
 const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) => {
-	const calendarRef = useRef<FullCalendar>(null); // Declare the ref; type is FullCalendar
+	const calendarRef = useRef<FullCalendar>(null); // Create a ref to the calendar
 
+	const [events, setEvents] = useState<any[]>([]); // Create a state variable to store the event sources
+
+	// const aspectRatio = window.innerWidth < 768 ? 0.5 : 0.6; // Set the aspect ratio based on the window width
+
+	const dispatch = useDispatch(); // Get the dispatch function from the Redux store
+
+	const [currentDate, setCurrentDate] = useState(new Date()); 
 
 	useEffect(() => {
-		if (calendarRef.current) {
-			const calendarApi = calendarRef.current.getApi(); // Access the getApi method
-			calendarApi.gotoDate(selectedDate); // Navigates calendar to the specified date
-			console.log(selectedDate);
+		if (selectedDate) {
+			setEvents([
+				{
+					events: [
+						{
+							title: "Selected Date",
+							start: selectedDate,
+							allDay: true,
+							color: "#388e3c",
+						},
+					],
+				},
+			]);
 		}
-	}, [selectedDate]);
+
+
+		if (calendarRef.current && selectedDate) {
+			const calendarApi = calendarRef.current.getApi();
+			calendarApi.gotoDate(selectedDate);
+
+			
+		}
+
+		const handleResize = () => {
+			if (calendarRef.current) {
+				const calendarApi = calendarRef.current.getApi();
+				calendarApi.setOption("height", "auto");
+			}
+		};
+		window.addEventListener("resize", handleResize); // Add an event listener to handle window resize
+		handleResize(); // Call the handleResize function to set the initial height
+		return () => {
+			window.removeEventListener("resize", handleResize); // Remove the event listener when the component is unmounted
+		};
+	}, [selectedDate, calendarRef]); /* Include all dependencies in the dependency array,
+     so the effect runs when any of the dependencies change */
+
+	const handleDateClick = (arg) => { 
+		const clickedDate = arg.date; // Get the date that was clicked
+
+		if (isPastDate(clickedDate)) {
+			alert("This date is not available for booking. Please select another date.");
+			return;
+		}
+
+		if(calendarRef.current) {
+			document.querySelectorAll(".fc-daygrid-day").forEach((day) => {
+				day.classList.remove("fc-day-selected");
+			});
+			// Add the selected class to the clicked date
+			arg.dayEl.classList.add("fc-day-selected");
+		}
+
+		setSelectedDate(clickedDate);
+		dispatch(appointmentActions.setSelectedDate(clickedDate));
+	};
+    
+	// Function to navigate to today's date
+	const navigateToToday = () => {
+		const today = new Date(); // Get today's date
+		setSelectedDate(today);
+		dispatch(appointmentActions.setSelectedDate(today));
+
+		// If the calendar ref is available, navigate to today's date
+		if (calendarRef.current) {
+			const calendarApi = calendarRef.current.getApi(); // Get the calendar API
+			calendarApi.gotoDate(today); // Navigate to today's date
+		}
+	};
+
+	// Function to navigate to the previous or next month
+	const navigate = (direction: "prev" | "next") => {
+		if (calendarRef.current) {
+			const calendarApi = calendarRef.current.getApi(); // Get the calendar API
+			direction === "prev" ? calendarApi.prev() : calendarApi.next(); // Navigate to the previous or next month
+			setCurrentDate(calendarApi.getDate()); // Update the current date
+		}
+	};
+
+	// function to determine past dates 
+	const isPastDate = (date: Date) => {
+		const today = new Date(); // Get today's date
+		today.setHours(0, 0, 0, 0); // Set the time to the beginning of the day (midnight)
+		return date < today; // Return true if the date is in the past, false otherwise
+	};
 
 	return (
-		<CalendarContainer>
-			<CalendarHeader>
-				<h2>Calendar</h2>
-			</CalendarHeader>
-			<CalendarBody>
+		<Card className="custom-calendar-card shadow-sm mb-4">
+			<Card.Header className="bg-success text-white">
+				<h2 className="mb-0">Calendar</h2>
+			</Card.Header>
+			<Card.Body>
 				<FullCalendar
+					ref={calendarRef}
 					plugins={[dayGridPlugin, interactionPlugin]}
 					initialView="dayGridMonth"
-					dateClick={(e) => setSelectedDate(new Date(e.dateStr))}
-					events={[
-						{ title: "event 1", date: "2021-08-01" },
-						{ title: "event 2", date: "2021-08-02" },
-					]}
-					ref={calendarRef} // Pass the ref to the FullCalendar component
+					showNonCurrentDates={false}
+					dateClick={handleDateClick}
+					events={events}
+					// aspectRatio={aspectRatio}
 				/>
-			</CalendarBody>
-			<CalendarFooter>
-				<Button variant="primary">Primary</Button>
-			</CalendarFooter>
-		</CalendarContainer>
+			</Card.Body>
+			<Card.Footer className="d-flex justify-content-between">
+				<Button variant="outline-success" onClick={() => navigate("prev")}>
+              Prev
+				</Button>
+				<Button variant="success" onClick={navigateToToday}>
+              Today
+				</Button>
+				<Button variant="outline-success" onClick={() => navigate("next")}>
+              Next
+				</Button>
+			</Card.Footer>
+		</Card>
 	);
 };
-
+    
 export default Calendar;

@@ -15,7 +15,71 @@ import Picture from "./Picture.tsx";
  * @see DoctorList
  */
 
-//== Component Props ==//
+//== Styled Components ==//
+
+const DoctorCard = styled.div`
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin: 10px 0; // Small margin for separation from other cards
+`;
+
+const DoctorImageContainer = styled.div`
+  width: 100%;
+  height: auto; // Responsive height
+  padding-top: 56.25%; // Aspect ratio for 16:9 images
+  position: relative; // For absolute positioning of the image
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  overflow: hidden;
+`;
+
+const DoctorImage = styled.img`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; // Cover the container without stretching
+`;
+
+const DoctorInfo = styled.div`
+  text-align: center;
+  padding: 15px;
+`;
+
+const DoctorName = styled.h3`
+  color: #333;
+  font-size: 1.25rem;
+  margin: 10px 0;
+`;
+
+const DoctorSpecialization = styled.p`
+  color: #666;
+  font-size: 1rem;
+`;
+
+const DepartmentName = styled(DoctorSpecialization)``; 
+
+const BookButton = styled.button`
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  margin-top: 15px; // Space from the text
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); // Soft shadow for depth
+  &:hover {
+    background-color: #388e3c;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); // Larger shadow on hover
+  }
+`;
 
 interface DoctorDetailsProps {
 	id: number;
@@ -28,75 +92,14 @@ interface DoctorDetailsProps {
 	onSelectMockDoctor: () => void;
 }
 
-//== Styled Components ==//
-
-const DoctorCard = styled.div`
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    // padding: 20px;
-    // margin: 10px;
-`;
-
-const DoctorImageContainer = styled.div`
-    width: 100%;
-    height: 150px; // Adjust based on your design
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    img {
-        width: auto;
-        height: 100%;
-    }
-`;
-
-const DoctorInfo = styled.div`
-    text-align: center;
-    margin-top: 10px;
-`;
-
-const DoctorName = styled.h3`
-    margin: 10px 0;
-`;
-
-const DoctorSpecialization = styled.p`
-    color: #666;
-`;
-
-const DepartmentName = styled.p`
-	color: #666;
-
-`;
-
-const BookButton = styled.button`
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    border-radius: 20px;
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    &:hover {
-        background-color: #388e3c;
-    }
-`;
-
-
 
 // == Component == //
-const DoctorDetails: React.FC<DoctorDetailsProps> = ({ 
-	name, specialization, departmentName,
-	imgUrl, altText, onSelectMockDoctor }) => {
+const DoctorDetails: React.FC<DoctorDetailsProps> = ({ name, specialization, departmentName, imgUrl, altText, onSelectMockDoctor }) => {
+
 	return (
 		<DoctorCard>
 			<DoctorImageContainer>
-				<img src={imgUrl} alt={altText} />
+				<DoctorImage src={imgUrl} alt={altText} />
 			</DoctorImageContainer>
 			<DoctorInfo>
 				<DoctorName>{name}</DoctorName>

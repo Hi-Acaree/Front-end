@@ -1,0 +1,56 @@
+/* styles.css */
+.custom-time-slot-container {
+    padding: 16px;
+    background-color: #ffffff; 
+    box-shadow: 0px 8px 16px rgba(0,0,0,0.1); /* Slight shadow for a card-like effect */
+    border-radius: 8px;
+    max-width: 600px; /* Limit width to 600px */
+    margin: 16px auto;
+    overflow: hidden; /* Ensures content does not overflow the rounded corners */
+  }
+  
+  .custom-time-slot-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); /* Creates a responsive grid layout */
+    gap: 10px; /* Space between grid items */
+    justify-content: center;
+  }
+  
+  .custom-time-slot-button {
+    padding: 12px 16px;
+    border: 2px solid transparent; /* Transparent border is used to avoid shifting content on selection */
+    background-color: #f9f9f9;
+    font-size: 0.9em; /* Smaller font size */
+    color: #333; /* Darker text for better readability */
+    border-radius: 4px; /* Slightly rounded corners for a softer look */
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s, transform 0.2s; /* Smooth transition for hover and selection effects */
+  }
+  
+  .custom-time-slot-button:hover {
+    background-color: #e0e0e0; /* A lighter shade for hover state */
+    transform: translateY(-2px); /* Slight lift effect on hover */
+  }
+  
+  .custom-time-slot-button.selected,
+  .custom-time-slot-button:active {
+    background-color: #4caf50; /* Selected state background color */
+    color: white; /* Text color for selected state */
+    border-color: #367c2b; /* Border color to highlight selected state */
+  }
+  
+  .custom-time-slot-button:disabled {
+    background-color: #e0e0e0;
+    color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  @media (max-width: 600px) {
+    .custom-time-slot-container {
+      margin: 8px;
+    }
+    .custom-time-slot-button {
+      padding: 10px; /* Smaller padding on mobile */
+    }
+  }
+  

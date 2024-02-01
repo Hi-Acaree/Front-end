@@ -1,33 +1,52 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Doctor, MockDoctor } from "../types/type";
 // import { format } from "date-fns";
+import { Button, Col } from "react-bootstrap";
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../context/store";
+import "./timeslot.css";
 
 //=== Styling ===//
+const mobileBreakpoint = "600px";
 
 const TimeSlotContainer = styled.div`
-	/* TimeSlot div styles */
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	/* Add your styles for the time slot here */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; // Align content to the top
+  align-items: center;
+  width: 100%; // Take full width of the parent container
+  max-height: calc(100vh - 160px); // Adjust max-height to provide space for headers/footers
+  overflow-y: auto; // Enable vertical scrolling if content overflows
+  @media (max-width: ${mobileBreakpoint}) {
+	max-height: calc(100vh - 60px); // Adjust for smaller header/footer on mobile
+  }
 `;
+
+const TimeSlotList = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); // Adjust number of columns as needed
+  gap: 15px;
+  padding: 15px;
+  width: 100%; // Ensure the grid takes the full width of its container
+`;
+
+
 
 const TimeSlotHeader = styled.div`
 	/* TimeSlotHeader div styles */
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	/* Add your styles for the time slot header here */
+	
 `;
 
 const TimeSlotBody = styled.div`
-	/* TimeSlotBody div styles */
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	/* Add your styles for the time slot body here */
+  /* TimeSlotBody div styles */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; // Ensures the TimeSlotBody takes up the full width available
 `;
 
 const TimeSlotFooter = styled.div`
@@ -38,6 +57,36 @@ const TimeSlotFooter = styled.div`
 	/* Add your styles for the time slot footer here */
 `;
 
+const TimeSlotButton = styled.button<{ isSelected: boolean }>`
+  padding: 10px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  background-color: ${({ isSelected }) => isSelected ? "#cce5ff" : "white"};
+  color: ${({ isSelected }) => isSelected ? "#004085" : "black"};
+  font-size: 0.9rem;
+  font-weight: bold;
+  border-radius: 5px;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover, &:focus {
+    background-color: ${({ isSelected }) => isSelected ? "#A0DB8E" : "#e6e6e6"};
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    background-color: #e0e0e0;
+    color: #ccc;
+    border-color: #ccc;
+    cursor: not-allowed;
+  }
+`;
+
+
+
+
+//=== Mock Data ===//
 
 const mockTimeSlots = [
 	"9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM",
@@ -45,6 +94,15 @@ const mockTimeSlots = [
 	"1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
 	"3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM"
 ];
+
+/**
+ * TimeSlot component
+ * @param {Date} selectedDate - The selected date
+ * @param {MockDoctor} selectedDoctor - The selected doctor
+ * @param {function} setSelectedTimeSlot - Callback function to set the selected time slot
+ * @param {boolean} isDateSelected - Flag to indicate if a date is selected
+ * @returns {ReactElement} TimeSlot component
+ */
 
 
 //=== Component Props ===//
@@ -55,6 +113,8 @@ interface TimeSlotProps {
     selectedDoctor: MockDoctor;
     setSelectedTimeSlot: (timeSlot: string) => void;
 	isDateSelected?: boolean;
+	isSelected?: boolean;
+
 }
 
 //=== Component ===//
@@ -64,47 +124,24 @@ const TimeSlot: React.FC<TimeSlotProps> = ({ selectedDate, selectedDoctor, setSe
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
-	// fetch available time slots for the selected doctor and date
+	const dispatch = useDispatch();
+	const selectedTimeSlot = useSelector((state: RootState) => state.appointment.selectedTimeSlot);
 
-	useEffect(() => {
-		if (selectedDoctor) {
-			const fetchAvailableTimeSlots = async () => {
-				setLoading(true);
-				setError(null);
-				try {
-					const response = await fetch(
-						`/api/doctors/${selectedDoctor.id}/available-time-slots?date=${selectedDate.toISOString()}`
-					);
-					if (!response.ok) {
-						throw new Error("Failed to fetch time slots");
-					}
-					const data = await response.json();
-					setTimeSlots(data);
-				} catch (error) {
-					setError(error.message);
-				} finally {
-					setLoading(false);
-				}
-			};
+	
 
-			fetchAvailableTimeSlots();
-		}
-	}, [selectedDate, selectedDoctor]);
-
-
-	//== use memo to memoize or cache the time slot elements ==//
 	const timeSlotElements = useMemo(() => {
-		return timeSlots.map((timeSlot) => (
-			<button
-				key={timeSlot}
-				onClick={() => setSelectedTimeSlot(timeSlot)}
-				className="time-slot-button"
-				disabled={!isDateSelected} // Disable the button if no date is selected
-			>
-				{timeSlot}
-			</button>
+		return mockTimeSlots.map((timeSlot) => (
+			<Col key={timeSlot} xs={6} md={3} >
+				<TimeSlotButton
+					isSelected={selectedTimeSlot === timeSlot}
+					onClick={() => setSelectedTimeSlot(timeSlot)}
+					disabled={!isDateSelected} // Disable the button if no date is selected
+				>
+					{timeSlot}
+				</TimeSlotButton>
+			</Col>
 		));
-	}, [timeSlots, setSelectedTimeSlot, isDateSelected]); // Add isDateSelected to dependencies
+	}, [selectedTimeSlot, isDateSelected, setSelectedTimeSlot]);
 
 	return (
 		<TimeSlotContainer>
@@ -114,11 +151,11 @@ const TimeSlot: React.FC<TimeSlotProps> = ({ selectedDate, selectedDoctor, setSe
 			</TimeSlotHeader>
 			<TimeSlotBody>
 				{/* TimeSlot body */}
-				<div className="time-slot-list">
+				<TimeSlotList>
 					{loading && <p>Loading...</p>}
 					{error && <p>{error}</p>}
 					{!loading && !error && timeSlotElements}
-				</div>
+				</TimeSlotList>
 			</TimeSlotBody>
 			<TimeSlotFooter>
 				{/* TimeSlot footer */}

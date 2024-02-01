@@ -2,6 +2,9 @@ import React from "react";
 import Picture from "./Picture.tsx";
 import styled from "styled-components";
 
+//=== Styling ===//
+
+
 const HeaderContainer = styled.div`
     display: flex;
     justify-content: space-between;
@@ -28,15 +31,25 @@ const Branding = styled.div`
 `;
 
 const Actions = styled.div`
+  display: flex;
+  align-items: center;
+  .search-bar {
     display: flex;
     align-items: center;
-    .search-bar {
-        input {
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    input {
+      border: none;
+      outline: none;
+      padding: 8px;
+      border-radius: 4px;
     }
+    .search-icon {
+      margin-right: 8px;
+      color: #666;
+    }
+  }
 `;
 
 const Profile = styled.div`
@@ -77,11 +90,13 @@ const Profile = styled.div`
     }
 `;
 
+/**
+ * Component
+ * @returns {ReactElement}
+ */
 
 
-
-
-
+//=== Component ===//
 
 const Header: React.FC = () => {
 	return (

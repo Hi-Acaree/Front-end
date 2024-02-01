@@ -13,37 +13,31 @@ import { appointmentActions } from "../context/AppointmentSlice.tsx";
 import { RootState } from "../context/store.tsx";
 
 import { bo } from "@fullcalendar/core/internal-common";
+import Footer from "../components/Footer.tsx";
 
+//== Styling ==//
 
 const AppointmentBookingContainer = styled.div`
-    display: flex;
-    height: 100vh;
+  display: flex;
+  flex-direction: column; // Stack children vertically
+  min-height: 100vh; // Use min-height to fill the screen but allow extension
 `;
 
 const MainContent = styled.div`
-    flex-grow: 1;
-    padding: 60px; /* Adjust padding based on Header height */
-    background-color: #f5f5f5;
+  flex-grow: 1; // Grow to take available space
+  padding: 60px; // Adjust padding based on Header height
+  background-color: #f5f5f5;
+  overflow: auto; // Scroll inside MainContent if needed
 `;
 
-
-// const DoctorListStyled = styled(DoctorList)`
-// flex: 1; // Keep the existing flex properties
-// overflow-y: auto; // Keep the existing scroll property
-// display: grid; // Set display to grid
-// grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); // Adjust the number of columns based on the container's width
-// grid-gap: 20px; // Set the gap between grid items
-// padding: 10px; // Add some padding around the grid
-// `;
-
 const BookingContent = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    margin: 20px;
-    height: calc(100vh - 120px); // Account for the header and footer
-    overflow: auto; // Hide overflow
-	width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin: 20px;
+  // Remove the height constraint to allow Footer to fit
+  overflow: auto; // Scroll inside BookingContent if needed
+  width: 100%;
 `;
 
 
@@ -105,8 +99,14 @@ const AppointmentBookingPage: React.FC = () => {
 		dispatch(appointmentActions.setBookingStep("appointmentMessage"));
 	};
 
-	const handleAppointmentSubmitMsg = (msg: string) => {
-		dispatch(appointmentActions.setAppointmentMsg(msg));
+	const handleAppointmentSubmitMsg = (email: string, reason: string, message: string) => {
+		const messageObject = {
+			email,
+			reason,
+			message,
+		};
+		
+		dispatch(appointmentActions.setAppointmentMsg(JSON.stringify(messageObject)));
 		dispatch(appointmentActions.setBookingStep("confirmation"));
 	};
 
@@ -144,7 +144,11 @@ const AppointmentBookingPage: React.FC = () => {
 					)}
 					{bookingStep === "appointmentMessage" && (
 						<AppointmentMessageInput
-							onMessageSubmit={handleAppointmentSubmitMsg}
+							onMessageSubmit={(email, reason, message) => {
+								handleAppointmentSubmitMsg(email, reason, message);
+
+
+							}}
 							onNextStep={() => dispatch(appointmentActions.setBookingStep("appointmentMessage"))}
 						/>
 					)}
@@ -153,16 +157,33 @@ const AppointmentBookingPage: React.FC = () => {
 						<BookingConfirmation
 							selectedDoctor={selectedDoctor}
 							appointmentType={appointmentType}
-							selectedDate={selectedDate}
+							selectedDate={selectedDate || new Date()}
 							selectedTimeSlot={selectedTimeSlot}
 							appointmentMsg={appointmentMsg}
 							onConfirm={() => {
 								// booking confirmation logic
+								const bookingDetails = {
+									selectedDoctor,
+									appointmentType,
+									selectedDate,
+									selectedTimeSlot,
+									appointmentMsg,
+								};
+								{/* dispatch the booking details to the server for email confirmation */}
+
+
+								{/* ...booking confirmation logic*/}
+
+
+
+								{/* Reset the booking step to display the doctorsList */}
+								appointmentActions.setBookingStep("doctorList");
+
 								console.log("Booking confirmed");
-								// show confirmation message
+								{/* Show Booking confirmation message*/}
 							}}
 							onCancel={() => {
-								// booking cancellation logic
+								{/** Booking cancellation logic, dispatch cancelation action to server */}
 								console.log("Booking cancelled");
 								appointmentActions.setBookingStep("doctorList");
 							}}
@@ -173,6 +194,7 @@ const AppointmentBookingPage: React.FC = () => {
 					{/* Other cases ... */}
 				</BookingContent>
 			</MainContent>
+			<Footer />
 		</AppointmentBookingContainer>
 	);
 };
