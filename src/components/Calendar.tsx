@@ -21,12 +21,19 @@ interface CalendarProps {
     setSelectedDate: (selectedDate: Date) => void,
 }
 
+interface Event {
+	title: string;
+	start: Date;
+	allDay: boolean;
+	classNames: string[];
+  }
+
 const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) => {
 	const calendarRef = useRef<FullCalendar>(null); // Create a ref to the calendar
 
-	const [events, setEvents] = useState<any[]>([]); // Create a state variable to store the event sources
+	const [events, setEvents] = useState<Event[]>([]); // Use the Event type for the events state
+	const [unavailableDates, setUnavailableDates] = useState<Event[]>([]); // Use the Event type for the unavailable dates state
 
-	// const aspectRatio = window.innerWidth < 768 ? 0.5 : 0.6; // Set the aspect ratio based on the window width
 
 	const dispatch = useDispatch(); // Get the dispatch function from the Redux store
 
@@ -35,40 +42,67 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) =>
 	useEffect(() => {
 		if (selectedDate) {
 			setEvents([
-				{
-					events: [
-						{
-							title: "Selected Date",
-							start: selectedDate,
-							allDay: true,
-							color: "#388e3c",
-						},
-					],
-				},
+				{ title: "",
+					start: selectedDate,
+					allDay: true,
+					classNames: [".fc-day-selected"]
+				}
 			]);
 		}
-
-
+		
 		if (calendarRef.current && selectedDate) {
 			const calendarApi = calendarRef.current.getApi();
 			calendarApi.gotoDate(selectedDate);
-
-			
 		}
-
-		const handleResize = () => {
-			if (calendarRef.current) {
-				const calendarApi = calendarRef.current.getApi();
-				calendarApi.setOption("height", "auto");
-			}
+	}, [selectedDate]); // Removed calendarRef from the dependency array
+	
+	useEffect(() => {
+		const handleResize = () => { if (calendarRef.current) {
+			const calendarApi = calendarRef.current.getApi();
+			calendarApi.setOption("height", "auto");
+		}
 		};
-		window.addEventListener("resize", handleResize); // Add an event listener to handle window resize
-		handleResize(); // Call the handleResize function to set the initial height
+		window.addEventListener("resize", handleResize);
+		handleResize();
 		return () => {
-			window.removeEventListener("resize", handleResize); // Remove the event listener when the component is unmounted
+			window.removeEventListener("resize", handleResize);
 		};
-	}, [selectedDate, calendarRef]); /* Include all dependencies in the dependency array,
-     so the effect runs when any of the dependencies change */
+	}, []); // Empty dependency array to run once on mount
+
+	useEffect(() => {
+		navigateToToday();
+	}, []); // Run the effect whenever the currentDate changes
+
+
+	
+	useEffect(() => {
+		const generatedUnavailableDates = generateUnavailableDates();
+		setUnavailableDates(generatedUnavailableDates);
+	}, []); // Empty dependency array to run once on mount
+
+	// Function to generate unavailable dates
+	
+	const generateUnavailableDates = (): Event[] => {
+		const dates: Event[] = []; // Define the type of the array as Event[]
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+	
+		// Generate unavailable dates for all past dates up to the current date
+		const d = new Date(today.getFullYear(), today.getMonth(), 1);
+		while (d < today) {
+			dates.push({
+				title: "",
+				start: new Date(d),
+				allDay: true,
+				classNames: ["unavailable-date"]
+			});
+			d.setDate(d.getDate() + 1);
+		}
+	
+		return dates;
+	};
+	
+	
 
 	const handleDateClick = (arg) => { 
 		const clickedDate = arg.date; // Get the date that was clicked
@@ -131,8 +165,8 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) =>
 					initialView="dayGridMonth"
 					showNonCurrentDates={false}
 					dateClick={handleDateClick}
-					events={events}
-					// aspectRatio={aspectRatio}
+					events={[...events, ...unavailableDates]}
+					
 				/>
 			</Card.Body>
 			<Card.Footer className="d-flex justify-content-between">

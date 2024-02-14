@@ -2,10 +2,13 @@
 //== Types == //
 export interface Doctor {
     id: string;
-    name: string;
+    personDetails: {
+      id: string;
+      pictureUrl: string;
+      firstName: string;
+      lastName: string; };
     specialization: string;
     departmentName: string;
-    imgUrl: string;
     altText: string;
    
 }
@@ -21,6 +24,13 @@ export interface MockDoctor {
     
 }
 
+export interface TimeSlotData {
+  id: string;
+  label: string;
+  startTime: string;
+  endTime: string;
+}
+
 export interface Message {
     message: string;
 }
@@ -32,11 +42,21 @@ export interface Booking {
     selectedTimeSlot: string | null;
 }
 
+export interface AppointmentBookingDTO {
+  doctorId: string;
+  patientName: string;
+  date: Date | null;
+  email: string;
+  timeSlotId: string;
+  reason: string;
+}
+
 export interface AppointmentState {
-  selectedDoctor: MockDoctor | null;
+  selectedDoctor: Doctor | null;
   appointmentType: string;
   selectedDate: Date | null;
-  selectedTimeSlot: string;
+  selectedTimeSlot: TimeSlotData | null;
+  bookingDTO: AppointmentBookingDTO | null,
   appointmentMsg: string;
   bookingStep: string;
   loading: boolean;

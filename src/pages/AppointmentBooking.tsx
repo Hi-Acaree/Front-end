@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import DoctorList from "../components/DoctorList.tsx";
-import { Doctor, MockDoctor } from "../types/type";
+import { AppointmentBookingDTO, Doctor, MockDoctor, TimeSlotData } from "../types/type";
 import Header from "../components/Header.tsx";
 import AppointmentTypeOverlay from "../components/AppointmentTypeOverlay.tsx";
 import DateTimeSelection from "../components/DateTimeSelection.tsx";
@@ -11,9 +11,8 @@ import AppointmentMessageInput from "../components/AppointmentMsgInput.tsx";
 import BookingConfirmation from "../components/BookingConfirmation.tsx";
 import { appointmentActions } from "../context/AppointmentSlice.tsx";
 import { RootState } from "../context/store.tsx";
-
-import { bo } from "@fullcalendar/core/internal-common";
 import Footer from "../components/Footer.tsx";
+import AppConfig from "../config/AppConfig.tsx";
 
 //== Styling ==//
 
@@ -74,6 +73,8 @@ const AppointmentBookingPage: React.FC = () => {
 	const selectedDate = useSelector((state: RootState) => state.appointment.selectedDate);
 	const selectedTimeSlot = useSelector((state: RootState) => state.appointment.selectedTimeSlot);
 	const appointmentMsg = useSelector((state: RootState) => state.appointment.appointmentMsg);
+	const bookingDetails = useSelector((state: RootState)=> state.appointment.bookingDTO);
+
 
 	console.log("Current Booking Step:", bookingStep);
 	const state = useSelector((state: RootState) => state);
@@ -81,8 +82,8 @@ const AppointmentBookingPage: React.FC = () => {
 
 
 
-	const handleMockDoctorSelect = (mockDoctor: MockDoctor) => {
-		dispatch(appointmentActions.setSelectedDoctor(mockDoctor));
+	const handleMockDoctorSelect = (doctor: Doctor) => {
+		dispatch(appointmentActions.setSelectedDoctor(doctor));
 		dispatch(appointmentActions.setBookingStep("appointmentType"));
 	};
 
@@ -93,25 +94,28 @@ const AppointmentBookingPage: React.FC = () => {
 		dispatch(appointmentActions.setBookingStep("dateTimeSelection"));
 	};
 
-	const handleDateTimeSelect = (date: Date, timeSlot: string) => {
+	const handleDateTimeSelect = (date: Date, timeSlot: TimeSlotData) => {
 		dispatch(appointmentActions.setSelectedDate(date));
 		dispatch(appointmentActions.setSelectedTimeSlot(timeSlot));
 		dispatch(appointmentActions.setBookingStep("appointmentMessage"));
 	};
 
-	const handleAppointmentSubmitMsg = (email: string, reason: string, message: string) => {
-		const messageObject = {
-			email,
-			reason,
-			message,
-		};
-		
-		dispatch(appointmentActions.setAppointmentMsg(JSON.stringify(messageObject)));
+	// handleAppointmentSubmitMsg function
+	const handleAppointmentSubmitMsg = (bookingDetails: AppointmentBookingDTO) => {
+		// Here, instead of making an API call, we store the bookingDetails in the state
+		// and proceed to the confirmation step
+		dispatch(appointmentActions.setBookingDTO(bookingDetails));
 		dispatch(appointmentActions.setBookingStep("confirmation"));
 	};
 
-	// const state = useSelector((state: AppointmentState) => state);
-	// console.log(state);
+	// getDoctorNameById function
+	const getDoctorNameById = (selectedDoctor) => {
+		return selectedDoctor ? `${selectedDoctor.personDetails.firstName} ${selectedDoctor.personDetails.lastName}` : "Unknown Doctor";
+	};
+  
+
+
+
 
 	console.log("Current Booking Step:", bookingStep);
 	
@@ -144,51 +148,56 @@ const AppointmentBookingPage: React.FC = () => {
 					)}
 					{bookingStep === "appointmentMessage" && (
 						<AppointmentMessageInput
-							onMessageSubmit={(email, reason, message) => {
-								handleAppointmentSubmitMsg(email, reason, message);
-
-
-							}}
-							onNextStep={() => dispatch(appointmentActions.setBookingStep("appointmentMessage"))}
+							onMessageSubmit={handleAppointmentSubmitMsg}
 						/>
 					)}
 
-					{bookingStep === "confirmation" && selectedDoctor && (
+					{bookingStep === "confirmation" && bookingDetails && (
 						<BookingConfirmation
-							selectedDoctor={selectedDoctor}
-							appointmentType={appointmentType}
-							selectedDate={selectedDate || new Date()}
-							selectedTimeSlot={selectedTimeSlot}
-							appointmentMsg={appointmentMsg}
-							onConfirm={() => {
-								// booking confirmation logic
-								const bookingDetails = {
-									selectedDoctor,
-									appointmentType,
-									selectedDate,
-									selectedTimeSlot,
-									appointmentMsg,
-								};
-								{/* dispatch the booking details to the server for email confirmation */}
+							doctorName={getDoctorNameById(selectedDoctor)}
+							appointmentType={appointmentType} 
+							selectedDate={selectedDate ? selectedDate : null}
+							reason={bookingDetails.reason}
+							email={bookingDetails.email}
+							onConfirm={
+								async () => {
+									const bookingApiUrl = `${AppConfig.apiAppointmentBaseUrl}/book/appointment`;
+									const bookingDTO = {
+										doctorId: bookingDetails.doctorId,
+										email: bookingDetails.email,
+										patientName: bookingDetails.patientName,
+										timeSlotId: bookingDetails.timeSlotId,
+										reason: bookingDetails.reason,
 
+									};
+									try {
+									  const response = await fetch(bookingApiUrl, {
+											method: "POST",
+											headers: {
+										  "Content-Type": "application/json",
+											},
+											body: JSON.stringify(
+												bookingDTO
 
-								{/* ...booking confirmation logic*/}
-
-
-
-								{/* Reset the booking step to display the doctorsList */}
-								appointmentActions.setBookingStep("doctorList");
-
-								console.log("Booking confirmed");
-								{/* Show Booking confirmation message*/}
-							}}
+											),
+									  });
+							  
+									  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+							  
+									  console.log("Booking confirmed");
+									  dispatch(appointmentActions.setBookingStep("doctorList"));
+									} catch (error) {
+									  console.error("Error confirming booking:", error);
+									}
+								
+								}}
 							onCancel={() => {
-								{/** Booking cancellation logic, dispatch cancelation action to server */}
 								console.log("Booking cancelled");
-								appointmentActions.setBookingStep("doctorList");
+								dispatch(appointmentActions.setBookingStep("doctorList"));
 							}}
 						/>
 					)}
+
 
 
 					{/* Other cases ... */}

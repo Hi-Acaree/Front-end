@@ -1,5 +1,8 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { RootState } from "../context/store";
+import { AppointmentBookingDTO } from "../types/type";
 
 //=== Styling ===//
 const MessageInputContainer = styled.div`
@@ -89,64 +92,87 @@ const SubmitButton = styled.button`
  * @returns {JSX.Element} - AppointmentMessageInput component
  */
 
-//=== Component props ===//
 interface AppointmentMessageInputProps {
-  onMessageSubmit: (email: string, reason: string, message: string) => void;
+  onMessageSubmit: (bookingDTO: AppointmentBookingDTO) => void;
+  onNextStep?: () => void;
 }
 
-//=== Component ===//
 const AppointmentMessageInput: React.FC<AppointmentMessageInputProps> = ({
 	onMessageSubmit,
 }) => {
-	const [email, setEmail] = useState<string>("");
-	const [reason, setReason] = useState<string>("");
-	const [message, setMessage] = useState<string>("");
+	const [email, setEmail] = useState("");
+	const [patientName, setPatientName] = useState("");
+	const [reason, setReason] = useState("");
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState("");
 
-	const handleSubmit = (event: React.FormEvent) => {
+	// Get the selected doctor, time slot, and date from the Redux store
+	const selectedDoctor = useSelector((state: RootState) => state.appointment.selectedDoctor);
+	const selectedTimeSlot = useSelector((state: RootState) => state.appointment.selectedTimeSlot);
+	const selectedDate = useSelector((state: RootState) => state.appointment.selectedDate);
+
+	const handleSubmit = async (event: React.FormEvent) => {
 		event.preventDefault();
-		onMessageSubmit(email, reason, message);
-		setEmail("");
-		setReason("");
-		setMessage("");
+		setIsLoading(true);
+		setError("");
+
+		// Check if selectedDoctor and selectedTimeSlot are not undefined
+		if (!selectedDoctor || !selectedTimeSlot) {
+			setError("Doctor and time slot must be selected.");
+			setIsLoading(false);
+			return;
+		}
+
+		const bookingDTO: AppointmentBookingDTO = {
+			date: selectedDate ? selectedDate : null,
+			doctorId: selectedDoctor.id.toString(),
+			email: email,
+			patientName: patientName,
+			timeSlotId: selectedTimeSlot.id.toString(),
+			reason: reason,
+		};
+
+		onMessageSubmit(bookingDTO);
+		setIsLoading(false);
 	};
 
 	return (
 		<MessageInputContainer>
-			<h1>Book a Consultation</h1>
+			<Heading>Book a Consultation</Heading>
 			<form onSubmit={handleSubmit}>
 				<Label htmlFor="email">Email Address</Label>
 				<Input
 					id="email"
 					type="email"
-					name="email"
-					placeholder="Enter your email"
 					value={email}
 					onChange={(e) => setEmail(e.target.value)}
+					required
+				/>
+				<Label htmlFor="patientName">Patient Name</Label>
+				<Input
+					id="patientName"
+					type="text"
+					value={patientName}
+					onChange={(e) => setPatientName(e.target.value)}
 					required
 				/>
 				<Label htmlFor="reason">Reason for Consultation</Label>
 				<Input
 					id="reason"
 					type="text"
-					name="reason"
-					placeholder="Reason for consultation"
+					placeholder="Reason for appointment"
 					value={reason}
 					onChange={(e) => setReason(e.target.value)}
 					required
 				/>
-				<Label htmlFor="message">Your Message</Label>
-				<TextArea
-					id="message"
-					name="message"
-					placeholder="Please enter the reason for your appointment"
-					value={message}
-					onChange={(e) => setMessage(e.target.value)}
-					required
-				/>
-				<SubmitButton type="submit">Submit</SubmitButton>
+				<SubmitButton type="submit" disabled={isLoading}>
+					{isLoading ? "Submitting..." : "Submit"}
+				</SubmitButton>
+				{error && <p style={{ color: "red" }}>{error}</p>}
 			</form>
 		</MessageInputContainer>
 	);
 };
+
 
 export default AppointmentMessageInput;

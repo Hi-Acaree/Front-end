@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { MockDoctor } from "../types/type";
+import { Doctor, MockDoctor } from "../types/type";
 
 //== Styling ==//
 
@@ -111,47 +111,36 @@ const ModalButton = styled(Button)`
 //== Component props ==//
 
 interface BookingConfirmationProps {
-  selectedDoctor: MockDoctor;
-  appointmentType: string;
-  selectedDate: Date;
-  selectedTimeSlot: string;
-  appointmentMsg: string;
+  doctorName: string;
+  appointmentType: string; 
+  selectedDate: Date | null;
+  reason: string;
+  email: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-
 //== Component ==//
 const BookingConfirmation: React.FC<BookingConfirmationProps> = ({
-	selectedDoctor,
+	doctorName,
 	appointmentType,
 	selectedDate,
-	selectedTimeSlot,
-	appointmentMsg,
+	reason,
+	email,
 	onConfirm,
 	onCancel,
 }) => {
 	return (
 		<ConfirmationContainer>
 			<ConfirmationTitle>Booking Confirmation</ConfirmationTitle>
-			<ConfirmationDetail>
-				<span>Doctor:</span> {selectedDoctor.name}
-			</ConfirmationDetail>
-			<ConfirmationDetail>
-				<span>Appointment Type:</span> {appointmentType}
-			</ConfirmationDetail>
-			<ConfirmationDetail>
-				<span>Date:</span> {selectedDate.toDateString()}
-			</ConfirmationDetail>
-			<ConfirmationDetail>
-				<span>Time Slot:</span> {selectedTimeSlot}
-			</ConfirmationDetail>
-			<ConfirmationDetail>
-				<span>Message:</span> {JSON.stringify(appointmentMsg.trim() || "N/A")}
-			</ConfirmationDetail>
+			<ConfirmationDetail><span>Doctor:</span> {doctorName}</ConfirmationDetail>
+			<ConfirmationDetail><span>Appointment Type:</span> {appointmentType}</ConfirmationDetail>
+			<ConfirmationDetail><span>Date:</span> {selectedDate?.toDateString()}</ConfirmationDetail>
+			<ConfirmationDetail><span>Reason:</span> {reason}</ConfirmationDetail>
+			<ConfirmationDetail><span>Email:</span> {email}</ConfirmationDetail>
 			<ButtonGroup>
 				<Button onClick={onConfirm}>Confirm Booking</Button>
-				<Button onClick={onCancel} data-type="cancel">Cancel</Button>
+				<Button onClick={onCancel}>Cancel</Button>
 			</ButtonGroup>
 		</ConfirmationContainer>
 	);

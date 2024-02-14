@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { MockDoctor, AppointmentState } from "../types/type";
+import { MockDoctor, AppointmentState, Doctor, TimeSlotData, AppointmentBookingDTO } from "../types/type";
 
 
 // Define the initial state
@@ -7,7 +7,8 @@ const initialState: AppointmentState = {
 	selectedDoctor: null,
 	appointmentType: "",
 	selectedDate: null,
-	selectedTimeSlot: "",
+	selectedTimeSlot: null,
+	bookingDTO: null,
 	appointmentMsg: "",
 	bookingStep: "doctorList",
 	loading: false,
@@ -18,7 +19,7 @@ const appointmentSlice = createSlice({
 	name: "appointment",
 	initialState,
 	reducers: {
-		setSelectedDoctor(state, action: PayloadAction<MockDoctor | null>) {
+		setSelectedDoctor(state, action: PayloadAction<Doctor | null>) {
 			state.selectedDoctor = action.payload;
 		},
 		setAppointmentType(state, action: PayloadAction<string>) {
@@ -27,8 +28,12 @@ const appointmentSlice = createSlice({
 		setSelectedDate(state, action: PayloadAction<Date>) {
 			state.selectedDate = action.payload;
 		},
-		setSelectedTimeSlot(state, action: PayloadAction<string>) {
+		setSelectedTimeSlot(state, action: PayloadAction<TimeSlotData | null>) {
 			state.selectedTimeSlot = action.payload;
+		},
+		setBookingDTO(state, action: PayloadAction<AppointmentBookingDTO | null> ){
+			state.bookingDTO = action.payload;
+
 		},
 		setAppointmentMsg(state, action: PayloadAction<string>) {
 			state.appointmentMsg = action.payload;
