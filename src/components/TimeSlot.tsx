@@ -55,6 +55,19 @@ const TimeSlotList = styled.div`
 `;
 
 
+const TimeSlotHeader = styled.h2`
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+  background-color: #f8f9fa;
+  display: flex;
+  margin: 0;
+  font-weight: 500;
+  padding: 10px 0;
+
+`;
+
 
 
 interface TimeSlotData {
@@ -101,6 +114,7 @@ const TimeSlot: React.FC<TimeSlotProps> = ({
 	return (
 		<TimeSlotContainer>
 			<TimeSlotList>
+				<TimeSlotHeader> Dr: {selectedDoctor.personDetails.firstName} {selectedDoctor.personDetails.lastName} Available Time slots </TimeSlotHeader>
 				{timeSlotElements}
 			</TimeSlotList>
 		</TimeSlotContainer>

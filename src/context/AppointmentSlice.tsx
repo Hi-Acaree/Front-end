@@ -12,6 +12,8 @@ const initialState: AppointmentState = {
 	appointmentMsg: "",
 	bookingStep: "doctorList",
 	loading: false,
+	bookingSuccess: false,
+	
 };
 
 // Create the slice
@@ -43,6 +45,9 @@ const appointmentSlice = createSlice({
 		},
 		setLoading(state, action: PayloadAction<boolean>) {
 			state.loading = action.payload;
+		},
+		setBookingSuccess(state, action: PayloadAction<boolean>) {
+			state.bookingSuccess = action.payload;
 		},
 	},
 });

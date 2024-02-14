@@ -151,8 +151,8 @@ const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ selectedDoctor, o
 			  // Convert start and end time to a more readable format
 			  const startTimeDate = new Date(slot.startTime[0], slot.startTime[1] - 1, slot.startTime[2], slot.startTime[3], slot.startTime[4]);
 			  const endTimeDate = new Date(slot.endTime[0], slot.endTime[1] - 1, slot.endTime[2], slot.endTime[3], slot.endTime[4]);
-			  const startTimeStr = startTimeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
-			  const endTimeStr = endTimeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+			  const startTimeStr = startTimeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
+			  const endTimeStr = endTimeDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: true });
 
 			  // Return the transformed time slot
 	  

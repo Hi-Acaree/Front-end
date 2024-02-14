@@ -13,6 +13,7 @@ import { appointmentActions } from "../context/AppointmentSlice.tsx";
 import { RootState } from "../context/store.tsx";
 import Footer from "../components/Footer.tsx";
 import AppConfig from "../config/AppConfig.tsx";
+import BookingSuccess from "../components/BookingSuccess.tsx";
 
 //== Styling ==//
 
@@ -71,9 +72,8 @@ const AppointmentBookingPage: React.FC = () => {
 	const bookingStep = useSelector((state: RootState) => state.appointment.bookingStep);
 	const appointmentType = useSelector((state: RootState) => state.appointment.appointmentType);
 	const selectedDate = useSelector((state: RootState) => state.appointment.selectedDate);
-	const selectedTimeSlot = useSelector((state: RootState) => state.appointment.selectedTimeSlot);
-	const appointmentMsg = useSelector((state: RootState) => state.appointment.appointmentMsg);
 	const bookingDetails = useSelector((state: RootState)=> state.appointment.bookingDTO);
+	const bookingSuccess = useSelector((state: RootState) => state.appointment.bookingSuccess);
 
 
 	console.log("Current Booking Step:", bookingStep);
@@ -168,6 +168,7 @@ const AppointmentBookingPage: React.FC = () => {
 										patientName: bookingDetails.patientName,
 										timeSlotId: bookingDetails.timeSlotId,
 										reason: bookingDetails.reason,
+										
 
 									};
 									try {
@@ -184,8 +185,8 @@ const AppointmentBookingPage: React.FC = () => {
 							  
 									  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 							  
-									  console.log("Booking confirmed");
-									  dispatch(appointmentActions.setBookingStep("doctorList"));
+									  dispatch(appointmentActions.setBookingSuccess(true));
+									  
 									} catch (error) {
 									  console.error("Error confirming booking:", error);
 									}
@@ -194,6 +195,16 @@ const AppointmentBookingPage: React.FC = () => {
 							onCancel={() => {
 								console.log("Booking cancelled");
 								dispatch(appointmentActions.setBookingStep("doctorList"));
+							}}
+						/>
+					)}
+
+					{bookingSuccess && (
+						<BookingSuccess
+							show={bookingSuccess}
+							onClose={() => {
+								dispatch(appointmentActions.setBookingSuccess(false));
+								dispatch(appointmentActions.setBookingStep("doctorList")); // Reset the booking step
 							}}
 						/>
 					)}

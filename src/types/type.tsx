@@ -59,6 +59,7 @@ export interface AppointmentState {
   bookingDTO: AppointmentBookingDTO | null,
   appointmentMsg: string;
   bookingStep: string;
+  bookingSuccess: boolean;
   loading: boolean;
 }
 
