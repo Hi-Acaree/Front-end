@@ -133,6 +133,8 @@ const DateTimeSelection: React.FC<DateTimeSelectionProps> = ({ selectedDoctor, o
 	const selectedTimeSlot = useSelector((state: RootState) => state.appointment.selectedTimeSlot);
 	const [weeklyAvailability, setWeeklyAvailability] = useState({});
 	const [isLoadingTimeSlots, setIsLoadingTimeSlots] = useState(false);
+	const [unavailableDates, setUnavailableDates] = useState([]); // Initialize unavailable dates state
+	  
 
 	useEffect(() => {
 		const fetchDoctorAvailability = async () => {

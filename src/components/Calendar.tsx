@@ -2,11 +2,13 @@ import React, { useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef } from "react";
 import "./calendar.css";
 import { appointmentActions } from "../context/AppointmentSlice.tsx";
 import { Card, Button } from "react-bootstrap";
+import { RootState } from "../context/store.tsx";
+import AppConfig from "../config/AppConfig.tsx";
 
 /**
  * Calendar component
@@ -28,7 +30,22 @@ interface Event {
 	classNames: string[];
   }
 
+const dayOfWeekMap = {
+	"SUNDAY": 0,
+	"MONDAY": 1,
+	"TUESDAY": 2,
+	"WEDNESDAY": 3,
+	"THURSDAY": 4,
+	"FRIDAY": 5,
+	"SATURDAY": 6,
+};
+  
+
 const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) => {
+
+	const selectedDoctor = useSelector((state: RootState) => state.appointment.selectedDoctor);
+
+
 	const calendarRef = useRef<FullCalendar>(null); // Create a ref to the calendar
 
 	const [events, setEvents] = useState<Event[]>([]); // Use the Event type for the events state
@@ -39,6 +56,21 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) =>
 
 	const [currentDate, setCurrentDate] = useState(new Date()); 
 
+	useEffect(() => {
+		if (selectedDoctor) {
+		// Replace `API_ENDPOINT` with your actual endpoint
+			const fetchUnavailableDays = async () => {
+				const response = await fetch(`http://localhost:8080/api/v1/doctor/unavailableDays/${selectedDoctor.id}`);
+				const unavailableDaysOfWeek = await response.json(); // ["SATURDAY", "SUNDAY"]
+				const newUnavailableDates = convertDaysOfWeekToDateRanges(unavailableDaysOfWeek);
+				setUnavailableDates(newUnavailableDates);
+			}; 
+			fetchUnavailableDays();
+		}
+	}, [selectedDoctor]); // Re-run this effect if `selectedDoctor` changes
+
+
+	
 	useEffect(() => {
 		if (selectedDate) {
 			setEvents([
@@ -101,6 +133,33 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) =>
 	
 		return dates;
 	};
+
+	// Function to convert days of the week to date ranges
+	const convertDaysOfWeekToDateRanges = (unavailableDaysOfWeek) => {
+		// Create mapping from the unavailable day strings to their numeric equivalents
+		const unavailableDayNumbers = unavailableDaysOfWeek.map(day => dayOfWeekMap[day]);
+	
+		// Determine the current date range displayed by FullCalendar
+		// mark for the next 3 months
+		const start = new Date(); // Get today's date
+		const end = new Date(); // Get today's date
+		end.setMonth(start.getMonth() + 3); // Set the end date to 3 months from now
+		const unavailableDates: Event[] = [];
+		for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+			if (unavailableDayNumbers.includes(d.getDay())) {
+				unavailableDates.push({
+					title: "",
+					start: new Date(d),
+					allDay: true,
+					classNames: ["unavailable-date"]
+				});
+			}
+		}
+		// Reset the date to avoid affecting the loop
+		start.setDate(start.getDate() - (end.getDate() - start.getDate()));
+	
+		return unavailableDates;
+	};
 	
 	
 
@@ -152,6 +211,7 @@ const Calendar: React.FC<CalendarProps> = ({ selectedDate, setSelectedDate }) =>
 		today.setHours(0, 0, 0, 0); // Set the time to the beginning of the day (midnight)
 		return date < today; // Return true if the date is in the past, false otherwise
 	};
+
 
 	return (
 		<Card className="custom-calendar-card shadow-sm mb-4">

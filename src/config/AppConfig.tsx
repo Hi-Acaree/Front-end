@@ -6,6 +6,7 @@ interface AppConfigProps {
     apiDoctorAvailabilityUrl: string;
     apiDoctorListUrl: string;
     apiPersonBaseUrl: string;
+    apiDoctorAvailabilityDayUrl: string;
 }
 
 const AppConfig: AppConfigProps = {
@@ -14,6 +15,7 @@ const AppConfig: AppConfigProps = {
 	apiDoctorAvailabilityUrl: process.env.REACT_APP_DOCTOR_AVAILABILITY_URL || "http://localhost:8080/api/v1/appointment/availableTimeSlots",
 	apiDoctorListUrl: process.env.REACT_APP_DOCTOR_LIST_URL || "http://localhost:8080/api/v1/doctor/all",
 	apiPersonBaseUrl: process.env.REACT_APP_PERSON_API_BASE_URL || "http://localhost:8080/api/v1/person",
+	apiDoctorAvailabilityDayUrl: process.env.REACT_APP_DOCTOR_AVAILABILITY_DAY_URL || "http://localhost:8080/api/v1/doctor/availability",
 
 };
 
